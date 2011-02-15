@@ -35,39 +35,64 @@
 
 #include "php_snippets.h"
 
-int intarray_setup(TSRMLS_D)
+static int _hash_element_dump(zval **entry TSRMLS_DC);
+
+int hash_setup(TSRMLS_D)
 {
 	return SUCCESS;
 }
 
-PHP_FUNCTION(intarray_init)
+PHP_FUNCTION(hash_foreach_print)
 {
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not yet implemented");
+	HashTable *arr;
+	HashPosition pos;
+	zval **entry;
+	zend_hash_key key;
+	int type;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "h", &arr) == FAILURE) {
+		return;
+	}
+
+	zend_hash_internal_pointer_reset_ex(arr, &pos);
+	while (zend_hash_get_current_data_ex(arr, (void **)&entry, &pos) == SUCCESS) {
+		type = zend_hash_get_current_key_ex(arr, &key.arKey, &key.nKeyLength, &key.h, 0, &pos);
+
+		switch (type) {
+			case HASH_KEY_IS_STRING:
+				PHPWRITE(key.arKey, key.nKeyLength - 1);
+				break;
+			case HASH_KEY_IS_LONG:
+				php_printf("%ld", (long)key.h);
+				break;
+			case HASH_KEY_NON_EXISTANT:
+			default:
+				return;
+		}
+
+		PHPWRITE(": ", 2);
+		php_var_export(entry, 0 TSRMLS_CC);
+		PHPWRITE(PHP_EOL, strlen(PHP_EOL));
+
+		zend_hash_move_forward_ex(arr, &pos);
+	}
 }
 
-PHP_FUNCTION(intarray_add)
+PHP_FUNCTION(hash_apply_dump)
 {
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not yet implemented");
+	HashTable *arr;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "h", &arr) == FAILURE) {
+		return;
+	}
+
+	zend_hash_apply(arr, (apply_func_t)_hash_element_dump TSRMLS_CC);
 }
 
-PHP_FUNCTION(intarray_get)
+static int _hash_element_dump(zval **entry TSRMLS_DC)
 {
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not yet implemented");
-}
-
-PHP_FUNCTION(intarray_set)
-{
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not yet implemented");
-}
-
-PHP_FUNCTION(intarray_unset)
-{
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not yet implemented");
-}
-
-PHP_FUNCTION(intarray_map)
-{
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not yet implemented");
+	php_var_dump(entry, 0 TSRMLS_CC);
+	return ZEND_HASH_APPLY_KEEP;
 }
 
 /*

@@ -52,6 +52,14 @@ extern "C" {
 
 /* {{{ intarray */
 
+int hash_setup(TSRMLS_D);
+
+PHP_FUNCTION(hash_foreach_print);
+PHP_FUNCTION(hash_apply_dump);
+
+/* }}} */
+/* {{{ intarray */
+
 int intarray_setup(TSRMLS_D);
 
 PHP_FUNCTION(intarray_init);

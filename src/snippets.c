@@ -37,6 +37,9 @@
 
 static PHP_MINIT_FUNCTION(snippets)
 {
+	if (hash_setup(TSRMLS_C) == FAILURE) {
+		return FAILURE;
+	}
 	if (intarray_setup(TSRMLS_C) == FAILURE) {
 		return FAILURE;
 	}
@@ -51,6 +54,8 @@ static PHP_MINFO_FUNCTION(snippets)
 }
 
 static zend_function_entry snippets_functions[] = {
+	PHP_FE(hash_foreach_print, NULL)
+	PHP_FE(hash_apply_dump, NULL)
 	PHP_FE(intarray_init, NULL)
 	PHP_FE(intarray_add, NULL)
 	PHP_FE(intarray_get, NULL)
@@ -73,7 +78,7 @@ static zend_module_entry snippets_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-#ifdef COMPILE_DL_CB
+#ifdef COMPILE_DL_SNIPPETS
 ZEND_GET_MODULE(snippets)
 #endif
 
